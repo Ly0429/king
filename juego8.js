@@ -128,16 +128,17 @@ const texturaCastillo = loader.load("castillo.png");
 const cueva = new THREE.Mesh(
     new THREE.PlaneGeometry(7, 9),
     new THREE.MeshBasicMaterial({
-        color: 0x8b4513,
+        color: 0xD9B282,
         map: texturaCastillo,
         transparent: true,
         side: THREE.DoubleSide
     })
 );
 
-cueva.position.set(138, 2.8, 1);
+cueva.position.set(143, -1, -4);
 
 scene.add(cueva);
+
 
 //_-----------------------------------------------------------------------------------
 
@@ -495,6 +496,14 @@ function animate() {
         jugador.scale.x = -1;
         moviendose = true;
     }
+
+    jugador.material.transparent = true;
+
+if (jugador.position.x > 135) {
+    jugador.material.opacity = 0.2;
+} else {
+    jugador.material.opacity = 1;
+}
 
     //  sonido de pasos
     if (moviendose && enSuelo) {
