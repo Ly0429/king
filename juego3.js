@@ -13,7 +13,7 @@ const camera = new THREE.PerspectiveCamera(
     0.1,
     1000
 );
-camera.position.set(0, 3, 10);
+camera.position.set(-140, 3, 10);
 
 
 //----------------------------------------------------------------------
@@ -31,7 +31,19 @@ scene.add(luzAmbiente);
 //objetos
 const loader = new THREE.TextureLoader();
 
-const texturaMono = loader.load("mono.png"); // o cangre.gif
+// Cargar textura y configurar para Pixel Art
+const texturaMono = loader.load("mono.png");
+texturaMono.magFilter = THREE.NearestFilter; // Evita que se vea borroso
+texturaMono.minFilter = THREE.NearestFilter;
+
+// --- Configuración de Animación ---
+const totalFrames = 6; // El número de monitos en tu imagen
+let frameActual = 0;
+let contadorTiempo = 0;
+const velocidadAnimacion = 6; // Ajusta esto: menor número = corre más rápido
+
+// IMPORTANTE: Le decimos a Three.js que solo muestre 1/7 de la imagen a la vez
+texturaMono.repeat.set(1 / totalFrames, 1);
 
 const fondo1 = loader.load("selva1.png"); // pagina 1
 const fondo2 = loader.load("selva2.png"); // pagina 2
@@ -50,8 +62,11 @@ const jugador = new THREE.Mesh(
     })
 );
 
-jugador.position.set(0, 2, 0);
+jugador.position.set(-240, 0, 0);
 scene.add(jugador);
+
+
+
 
 //--------------------------------------------------------------------
 //pantalla adaptable
@@ -69,7 +84,7 @@ const bg1 = new THREE.Mesh(
     new THREE.PlaneGeometry(300, 150),
     new THREE.MeshBasicMaterial({ map: fondo1 })
 );
-bg1.position.set(0, -7, -60);
+bg1.position.set(0, -6, -60);
 scene.add(bg1);
 
 // MEDIO
@@ -77,7 +92,7 @@ const bg2 = new THREE.Mesh(
     new THREE.PlaneGeometry(300, 100),
     new THREE.MeshBasicMaterial({ map: fondo2, transparent: true })
 );
-bg2.position.set(0, -5, -50);
+bg2.position.set(0, 0, -50);
 scene.add(bg2);
 
 // CERCA
@@ -85,7 +100,7 @@ const bg3 = new THREE.Mesh(
     new THREE.PlaneGeometry(300, 100),
     new THREE.MeshBasicMaterial({ map: fondo3, transparent: true })
 );
-bg3.position.set(0, -4.5, -50);
+bg3.position.set(0, 0, -50);
 scene.add(bg3);
 
 
@@ -134,23 +149,41 @@ let enSuelo = false;
 function animate() {
     requestAnimationFrame(animate);
 
-    const anchoFondo = 100;
-    // Controles
+    // 1. Definimos si el mono se está moviendo (esto faltaba)
+    let moviendose = false;
+
+    // 2. Controles
     if (keys["ArrowRight"]) {
-        jugador.position.x += velocidadCaminar;
-        jugador.scale.x = 1; // Mirar a la derecha
+        jugador.position.x += 0.3; // Bajé un poco la velocidad (era 1, que es muy rápido)
+        jugador.scale.x = 1;
+        moviendose = true;
     }
     if (keys["ArrowLeft"]) {
-        jugador.position.x -= velocidadCaminar;
-        jugador.scale.x = -1; // Mirar a la izquierda
+        jugador.position.x -= 0.3;
+        jugador.scale.x = -1;
+        moviendose = true;
     }
 
-    // gravedad
+    // 3. Lógica de Animación (ahora sí funcionará 'moviendose')
+    if (moviendose && enSuelo) {
+        contadorTiempo++;
+        if (contadorTiempo % velocidadAnimacion === 0) {
+            frameActual = (frameActual + 1) % totalFrames;
+            texturaMono.offset.x = frameActual / totalFrames;
+        }
+    } else if (!enSuelo) {
+        // Frame de salto: usamos el frame 5 (el 6to monito)
+        texturaMono.offset.x = 5 / totalFrames;
+    } else {
+        // Si está quieto, volvemos al primer frame
+        texturaMono.offset.x = 0;
+    }
+
+    // 4. Física: Gravedad y Salto
     velocidadY += gravedad;
     jugador.position.y += velocidadY;
 
-    //  Detección del piso
-    if (jugador.position.y <= piso.position.y + 2) { 
+    if (jugador.position.y <= piso.position.y + 2) {
         jugador.position.y = piso.position.y + 2;
         velocidadY = 0;
         enSuelo = true;
@@ -158,17 +191,55 @@ function animate() {
         enSuelo = false;
     }
 
-    // Salto
     if (keys["Space"] && enSuelo) {
         velocidadY = fuerzaSalto;
         enSuelo = false;
     }
 
-    // Cámara sigue al jugador
-    camera.position.x = jugador.position.x;
-    
-    // Parallax 
-    bg1.position.x = camera.position.x * 0.9; 
+
+
+    let posicionDeseada = jugador.position.x;
+
+    //limite camara izquierda
+    const limiteCamaraIzq = -140;   // cámara se detiene aquí
+
+
+    if (posicionDeseada < limiteCamaraIzq) {
+        posicionDeseada = limiteCamaraIzq;
+    }
+
+
+    //limite camara derecha
+
+    const limiteCamaraDer = 130;
+
+    if (posicionDeseada > limiteCamaraDer) {
+        posicionDeseada = limiteCamaraDer;
+    }
+
+    camera.position.x = posicionDeseada;
+
+    //limite jugador izquierda
+    const limiteJugadorIzq = -180;  // jugador puede ir más allá
+
+    const limiteIzquierdo = -150;
+
+    if (jugador.position.x < limiteIzquierdo) {
+        jugador.position.x = limiteIzquierdo;
+    }
+
+    //limite jugador derecha
+
+    const limiteJugadorDer = 150;
+
+    if (jugador.position.x > limiteJugadorDer) {
+        jugador.position.x = limiteJugadorDer;
+    }
+
+
+    // 5. Cámara y Parallax
+
+    bg1.position.x = camera.position.x * 0.95;
     bg2.position.x = camera.position.x * 0.7;
     bg3.position.x = camera.position.x * 0.4;
 
