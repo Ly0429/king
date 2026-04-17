@@ -106,13 +106,13 @@ const loader = new THREE.TextureLoader();
 
 // Cargar textura y configurar para Pixel Art
 const texturaMono = loader.load("mono.png");
-texturaMono.magFilter = THREE.NearestFilter; // Evita que se vea borroso
+texturaMono.magFilter = THREE.NearestFilter; 
 texturaMono.minFilter = THREE.NearestFilter;
 
 
 
 // Cargar textura de banana
-const texturaBanana = loader.load("banana.png"); // Asegúrate de que el archivo exista
+const texturaBanana = loader.load("banana.png"); 
 texturaBanana.magFilter = THREE.NearestFilter;
 texturaBanana.minFilter = THREE.NearestFilter;
 
@@ -120,6 +120,24 @@ texturaBanana.minFilter = THREE.NearestFilter;
 const texturaPajaro = loader.load("pajaro.png");
 texturaPajaro.magFilter = THREE.NearestFilter;
 texturaPajaro.minFilter = THREE.NearestFilter;
+
+
+//cueva
+const texturaCastillo = loader.load("castillo.png"); 
+
+const cueva = new THREE.Mesh(
+    new THREE.PlaneGeometry(7, 9),
+    new THREE.MeshBasicMaterial({
+        color: 0x8b4513,
+        map: texturaCastillo,
+        transparent: true,
+        side: THREE.DoubleSide
+    })
+);
+
+cueva.position.set(138, 2.8, 1);
+
+scene.add(cueva);
 
 //_-----------------------------------------------------------------------------------
 
