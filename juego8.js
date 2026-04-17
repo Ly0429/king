@@ -65,6 +65,13 @@ audioLoader.load("step.mp3", function (buffer) {
     sonidoPaso.setVolume(0.5);
 });
 
+//sonido pajaro
+const sonidoGolpe = new THREE.Audio(listener);
+
+audioLoader.load("hit.mp3", function (buffer) {
+    sonidoGolpe.setBuffer(buffer);
+    sonidoGolpe.setVolume(1);
+});
 //_------------------------------------------------------
 
 let juegoIniciado = false;
@@ -629,9 +636,15 @@ function animate() {
         const dy = jugador.position.y - enemigo.position.y;
         const distancia = Math.sqrt(dx * dx + dy * dy);
 
-        if (distancia < 2.5) {
+        if (distancia < 4) {
 
-            alert("💀 Game Over");
+            console.log("💀 GAME OVER");
+
+            // 🔊 reproducir sonido
+            if (sonidoGolpe.buffer) {
+                if (sonidoGolpe.isPlaying) sonidoGolpe.stop();
+                sonidoGolpe.play();
+            }
 
             reiniciarJuego();
         }
