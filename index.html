@@ -3,12 +3,46 @@
 <head>
   <meta charset="utf-8">
   <title>Jueguito</title>
+
   <style>
     body { margin: 0; overflow: hidden; }
     canvas { display: block; }
+
+    #playBtn {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 30px;
+        padding: 15px 30px;
+        background: black;
+        color: white;
+        border: none;
+        cursor: pointer;
+        z-index: 10; 
+    }
   </style>
 </head>
+
 <body>
-  <script type="module" src="juego3.js"></script>
+
+  <!-- BOTÓN -->
+  <button id="playBtn">PLAY</button>
+
+  <div id="scoreBoard" style="
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 30px;
+    color: yellow;
+    text-shadow: 2px 2px #000;
+    z-index: 100;
+    display: none; 
+">Bananas: 0</div>
+
+  <!-- JUEGO -->
+  <script type="module" src="juego6.js"></script>
+
 </body>
 </html>
